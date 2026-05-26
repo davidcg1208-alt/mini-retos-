@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classasist - Bitácora de Desarrollo</title>
+    <style>
+        /* =========================================
+           VARIABLES Y DISEÑO BASE (Dark Tech)
+           ========================================= */
+        :root {
+            --bg-main: #0f172a; /* Fondo azul muy oscuro */
+            --bg-card: #1e293b; /* Fondo de tarjetas */
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6; /* Azul brillante */
+            --success: #10b981; /* Verde esmeralda */
+            --warning: #f59e0b; /* Naranja */
+            --font-main: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            line-height: 1.7;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 80px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            color: var(--text-main);
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+
+        .header h1 span {
+            color: var(--accent);
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* =========================================
+           LÍNEA DE TIEMPO (TIMELINE)
+           ========================================= */
+        .timeline {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            padding-left: 40px;
+        }
+
+        /* La línea vertical brillante */
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 15px;
+            height: 100%;
+            width: 4px;
+            background: linear-gradient(to bottom, var(--accent), transparent);
+            border-radius: 4px;
+        }
+
+        /* =========================================
+           TARJETAS DE CADA VERSIÓN
+           ========================================= */
+        .log-entry {
+            position: relative;
+            margin-bottom: 60px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 30px 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            /* Estado inicial para la animación de scroll */
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Efecto Hover para que las tarjetas resalten */
+        .log-entry:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        /* Clase que JS agregará para mostrar la tarjeta */
+        .log-entry.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* El punto brillante en la línea de tiempo */
+        .log-entry::before {
+            content: '';
+            position: absolute;
+            top: 40px;
+            left: -33px;
+            width: 16px;
+            height: 16px;
+            background-color: var(--bg-main);
+            border: 4px solid var(--accent);
+            border-radius: 50%;
+            z-index: 2;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        /* =========================================
+           CONTENIDO INTERNO ("LO QUE OCUPAMOS")
+           ========================================= */
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+        }
+
+        .version-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .date-badge {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* Etiquetas personalizadas (Tags) */
+        .tags-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .tag-status { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .tag-module { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+        .tag-tech { background: rgba(255, 255, 255, 0.1); color: #cbd5e1; }
+
+        .entry-body h4 {
+            color: var(--accent);
+            margin: 20px 0 10px 0;
+            font-size: 1.1rem;
+        }
+
+        .entry-body ul {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .entry-body ul li {
+            position: relative;
+            padding-left: 25px;
+            margin-bottom: 10px;
+            color: var(--text-muted);
+        }
+
+        /* Viñetas personalizadas animadas */
+        .entry-body ul li::before {
+            content: '▹';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-size: 1.2rem;
+            transition: transform 0.2s;
+        }
+
+        .entry-body ul li:hover::before {
+            transform: translateX(3px);
+        }
+
+        /* =========================================
+           ANIMACIONES CLAVE
+           ========================================= */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Bitácora <span>Classasist</span></h1>
+        <p>Registro de desarrollo desde cero. Construcción, estructuración y control de versiones del proyecto.</p>
+    </div>
+
+    <div class="timeline">
+
+        <article class="log-entry">
+            <div class="entry-header">
+                <h2 class="version-title">v0.1.0 - Estructura Base</h2>
+                <span class="date-badge">26 MAY 2026</span>
+            </div>
+
+            <div class="tags-container">
+                <span class="tag tag-status">En Progreso</span>
+                <span class="tag tag-module">Módulo: Diseño UI</span>
+                <span class="tag tag-tech">HTML5 / CSS3 / JS</span>
+            </div>
+
+            <div class="entry-body">
+                <h4>Cambios Implementados</h4>
+                <ul>
+                    <li>Se descartó la interfaz anterior para iniciar un diseño estilo Dark Mode.</li>
+                    <li>Creación de la línea de tiempo interactiva con animaciones al hacer scroll.</li>
+                    <li>Incorporación de sistema de etiquetas para filtrar el estado del proyecto.</li>
+                </ul>
+
+                <h4>Archivos Modificados</h4>
+                <ul>
+                    <li><code>index.html</code> - Creación de la estructura semántica.</li>
+                    <li><code>styles.css</code> - Integración de variables CSS y diseño Glassmorphism oscuro.</li>
+                </ul>
+            </div>
+        </article>
+        <article class="log-entry">
+            <div class="entry-header">
+                <h2 class="version-title">v0.0.1 - Planeación</h2>
+                <span class="date-badge">15
